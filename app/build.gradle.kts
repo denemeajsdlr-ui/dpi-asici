@@ -13,8 +13,8 @@ android {
         applicationId = "com.dpibypass"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 5
+        versionName = "1.5"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
         externalNativeBuild {
             ndkBuild {
@@ -24,6 +24,16 @@ android {
     }
 
     externalNativeBuild { ndkBuild { path = file("src/main/jni/Android.mk") } }
+
+    // Sabit imza: her derlemede aynı anahtar kullanılır, böylece yeni APK eskisinin üstüne sorunsuz kurulur
+    signingConfigs {
+        create("fixed") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
 
     buildFeatures { compose = true }
 
@@ -37,9 +47,13 @@ android {
     kotlinOptions { jvmTarget = "17" }
 
     buildTypes {
+        debug {
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("fixed")
+        }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("fixed")
         }
     }
 }

@@ -32,6 +32,14 @@ class Prefs(ctx: Context) {
         get() = sp.getBoolean("only_discord", false)
         set(v) = sp.edit().putBoolean("only_discord", v).apply()
 
+    var engine: String
+        get() = sp.getString("engine", "safe") ?: "safe"
+        set(v) = sp.edit().putString("engine", v).apply()
+
+    var lang: String
+        get() = sp.getString("lang", null) ?: Strings.default()
+        set(v) = sp.edit().putString("lang", v).apply()
+
     fun activeArgs(): String =
         if (presetId == Presets.CUSTOM) customArgs
         else Presets.all.firstOrNull { it.id == presetId }?.args ?: ""

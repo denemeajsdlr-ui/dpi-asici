@@ -21,6 +21,8 @@ object Byedpi {
     @Synchronized
     fun start(ctx: Context, args: String): Boolean {
         stop()
+        // Önceki çökmeden kalmış yetim ByeDPI süreci portu tutuyor olabilir
+        try { Runtime.getRuntime().exec(arrayOf("sh", "-c", "pkill -f libbyedpi.so")).waitFor() } catch (_: Exception) {}
         val bin = File(ctx.applicationInfo.nativeLibraryDir, "libbyedpi.so")
         if (!bin.exists()) return false
         val cmd = listOf(bin.absolutePath, "--ip", "127.0.0.1", "--port", PORT.toString()) +
@@ -113,10 +115,10 @@ object Tester {
         hosts.map { h -> async(Dispatchers.IO) { probe(h) } }.awaitAll().all { it }
     }
 
-    suspend fun autoTune(ctx: Context, onProgress: (String) -> Unit): Preset? =
+    suspend fun autoTune(ctx: Context, onProgress: (Int, Int, Preset) -> Unit): Preset? =
         withContext(Dispatchers.IO) {
             for ((i, p) in Presets.all.withIndex()) {
-                onProgress("Deneniyor ${i + 1}/${Presets.all.size}: ${p.name}")
+                onProgress(i + 1, Presets.all.size, p)
                 if (!Byedpi.start(ctx, p.args)) { Byedpi.stop(); continue }
                 val ok = testAll()
                 Byedpi.stop()

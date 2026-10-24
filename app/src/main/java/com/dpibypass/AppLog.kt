@@ -36,7 +36,7 @@ object AppLog {
     }
 
     @Synchronized
-    fun read(): String = try { file?.readText()?.takeLast(2500) ?: "" } catch (_: Exception) { "" }
+    fun read(): String = try { file?.readText()?.takeLast(4500) ?: "" } catch (_: Exception) { "" }
 
     @Synchronized
     fun clear() { try { file?.writeText("") } catch (_: Exception) {} }

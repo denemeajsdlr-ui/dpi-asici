@@ -3,13 +3,35 @@
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:pathData="M54,26 L76,34 L76,54 C76,68 66,77 54,83 C42,77 32,68 32,54 L32,34 Z">
+    <!-- parlama -->
+    <path android:pathData="M54,54 m-42,0 a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0">
         <aapt:attr name="android:fillColor">
-            <gradient android:startX="32" android:startY="26" android:endX="76" android:endY="83" android:type="linear">
-                <item android:offset="0" android:color="#FF22D3EE" />
-                <item android:offset="1" android:color="#FF7C5CFF" />
+            <gradient android:type="radial" android:centerX="54" android:centerY="54" android:gradientRadius="42">
+                <item android:offset="0" android:color="#5522D3EE" />
+                <item android:offset="0.6" android:color="#227C5CFF" />
+                <item android:offset="1" android:color="#00000000" />
             </gradient>
         </aapt:attr>
     </path>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M57,38 L45,57 L52,57 L50,72 L63,52 L55,52 Z" />
+    <!-- dış kalkan -->
+    <path android:pathData="M54,27 L74,34.5 L74,53 C74,66 65,74.5 54,80 C43,74.5 34,66 34,53 L34,34.5 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:startX="34" android:startY="27" android:endX="74" android:endY="80" android:type="linear">
+                <item android:offset="0" android:color="#FF22D3EE" />
+                <item android:offset="1" android:color="#FF8B5CF6" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- iç kalkan -->
+    <path android:fillColor="#FF0B1230"
+        android:pathData="M54,31.5 L70,37.5 L70,53 C70,63.5 63,70.5 54,75.5 C45,70.5 38,63.5 38,53 L38,37.5 Z" />
+    <!-- yıldırım -->
+    <path android:pathData="M57,38 L46.5,55.5 L52.5,55.5 L50.5,70 L62,50.5 L55.5,50.5 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:startX="50" android:startY="38" android:endX="58" android:endY="70" android:type="linear">
+                <item android:offset="0" android:color="#FFFFFFFF" />
+                <item android:offset="1" android:color="#FF67E8F9" />
+            </gradient>
+        </aapt:attr>
+    </path>
 </vector>

@@ -22,7 +22,7 @@ SRC="$(ls build/byedpi/*.c | grep -v win_service || true)"
 
 build() {
   mkdir -p "app/src/main/jniLibs/$1"
-  "$BIN/${2}26-clang" -O2 -std=gnu99 -D_GNU_SOURCE -I build/byedpi \
+  "$BIN/${2}26-clang" -O2 -std=gnu99 -D_GNU_SOURCE -Wl,-z,max-page-size=16384 -I build/byedpi \
     -o "app/src/main/jniLibs/$1/libbyedpi.so" $SRC
 }
 build arm64-v8a   aarch64-linux-android
