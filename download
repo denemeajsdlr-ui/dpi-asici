@@ -1,0 +1,6 @@
+build/
+.gradle/
+local.properties
+.idea/
+app/src/main/jniLibs/
+app/src/main/jni/hev-socks5-tunnel/

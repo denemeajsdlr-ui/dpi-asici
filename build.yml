@@ -1,0 +1,28 @@
+name: APK Derle
+on:
+  workflow_dispatch:
+  push:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Android SDK hazırla
+        run: |
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" --install "platforms;android-34" "build-tools;34.0.0" "ndk;26.3.11579264"
+      - run: bash scripts/setup.sh
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "8.9" }
+      - run: gradle assembleDebug --no-daemon
+      - run: cp app/build/outputs/apk/debug/app-debug.apk DPI-Asici.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: son-surum
+          name: DPI Aşıcı (son sürüm)
+          files: DPI-Asici.apk
