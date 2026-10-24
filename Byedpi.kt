@@ -21,6 +21,8 @@ object Byedpi {
     @Synchronized
     fun start(ctx: Context, args: String): Boolean {
         stop()
+        // Önceki çökmeden kalmış yetim ByeDPI süreci portu tutuyor olabilir
+        try { Runtime.getRuntime().exec(arrayOf("sh", "-c", "pkill -f libbyedpi.so")).waitFor() } catch (_: Exception) {}
         val bin = File(ctx.applicationInfo.nativeLibraryDir, "libbyedpi.so")
         if (!bin.exists()) return false
         val cmd = listOf(bin.absolutePath, "--ip", "127.0.0.1", "--port", PORT.toString()) +
