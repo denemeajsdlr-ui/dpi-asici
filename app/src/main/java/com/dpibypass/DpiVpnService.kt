@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import androidx.core.app.ServiceCompat
 import hev.htproxy.TProxyService
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,11 @@ class DpiVpnService : VpnService() {
     private var tun: ParcelFileDescriptor? = null
     private var tunnelRunning = false
 
+    override fun onCreate() {
+        super.onCreate()
+        AppLog.init(this)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
             stopAll()
@@ -40,15 +46,38 @@ class DpiVpnService : VpnService() {
     }
 
     private fun startAll() {
+        try {
+            doStart()
+        } catch (t: Throwable) {
+            AppLog.w("HATA: " + Log.getStackTraceString(t).take(1200))
+            fail("Beklenmeyen hata: ${t.javaClass.simpleName}: ${t.message}")
+        }
+    }
+
+    private fun doStart() {
         status.value = VpnStatus.CONNECTING
         error.value = ""
+        AppLog.w("--- Bağlanma başladı")
         val prefs = Prefs(this)
 
-        if (!Byedpi.start(this, prefs.activeArgs())) {
-            fail("DPI motoru başlatılamadı. Ayarı değiştirmeyi dene.")
+        // 1) Tünel kütüphanesi yükleniyor mu? (VPN açılmadan önce kontrol)
+        try {
+            Class.forName("hev.htproxy.TProxyService")
+            AppLog.w("1/5 tünel kütüphanesi yüklendi")
+        } catch (t: Throwable) {
+            AppLog.w("Kütüphane hatası: " + Log.getStackTraceString(t).take(800))
+            fail("Tünel kütüphanesi yüklenemedi: ${t.message ?: t.javaClass.simpleName}")
             return
         }
 
+        // 2) DPI motoru
+        if (!Byedpi.start(this, prefs.activeArgs())) {
+            fail("DPI motoru başlatılamadı. Başka bir yöntem dene.")
+            return
+        }
+        AppLog.w("2/5 DPI motoru çalışıyor (${prefs.activeArgs()})")
+
+        // 3) VPN arayüzü
         val b = Builder()
             .setSession("DPI Aşıcı")
             .setMtu(MTU)
@@ -61,7 +90,7 @@ class DpiVpnService : VpnService() {
 
         try {
             if (prefs.onlyDiscord) b.addAllowedApplication("com.discord")
-            else b.addDisallowedApplication(packageName) // motorun kendi trafiği döngüye girmesin
+            else b.addDisallowedApplication(packageName)
         } catch (e: PackageManager.NameNotFoundException) {
             fail("Discord yüklü değil.")
             return
@@ -70,7 +99,9 @@ class DpiVpnService : VpnService() {
         val fd = try { b.establish() } catch (e: Exception) { null }
         if (fd == null) { fail("VPN kurulamadı."); return }
         tun = fd
+        AppLog.w("3/5 VPN arayüzü kuruldu")
 
+        // 4) Tünel motoru
         val cfg = File(filesDir, "tproxy.yml")
         cfg.writeText(
             """
@@ -87,8 +118,10 @@ class DpiVpnService : VpnService() {
               log-level: warn
             """.trimIndent()
         )
+        AppLog.w("4/5 tünel başlatılıyor…")
         TProxyService.TProxyStartService(cfg.absolutePath, fd.fd)
         tunnelRunning = true
+        AppLog.w("5/5 tünel başlatıldı - BAĞLI")
         status.value = VpnStatus.CONNECTED
     }
 
