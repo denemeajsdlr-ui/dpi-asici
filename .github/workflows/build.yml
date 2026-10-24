@@ -11,8 +11,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
-      - uses: android-actions/setup-android@v3
-      - run: sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;26.3.11579264"
+      - name: Android SDK hazırla
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager --install "platforms;android-34" "build-tools;34.0.0" "ndk;26.3.11579264"
       - run: bash scripts/setup.sh
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: "8.9" }
